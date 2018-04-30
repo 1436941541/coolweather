@@ -1,10 +1,14 @@
 package yang.com.coolweather.utils;
 
 import android.text.TextUtils;
+import android.util.Log;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.litepal.crud.DataSupport;
+
+import java.util.List;
 
 import yang.com.coolweather.db.City;
 import yang.com.coolweather.db.Country;
@@ -61,9 +65,9 @@ public class Utility {
                     JSONObject countryObject = allCountry.getJSONObject(i);
                     Country country = new Country();
                     country.setCountryName(countryObject.getString("name"));
-                    country.setCountryCode(countryObject.getInt("id"));
                     country.setWeatherId(countryObject.getString("weather_id"));
                     country.setCityId(cityId);
+                    country.save();
                 }
                 return true;
             } catch (JSONException e) {

@@ -3,7 +3,9 @@ package yang.com.coolweather.fragment;
 import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.annotation.StringRes;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -38,6 +40,7 @@ import yang.com.coolweather.utils.Utility;
 
 public class ChooseAreaFragment extends Fragment {
     public static final int LEVEL_PROVINCE = 0;
+    public static final String TAG="yyj";
     public static final int LEVEL_CITY = 1;
     public static final int LEVEL_COUNTRY = 2;
     private int currentLevel;
@@ -114,7 +117,8 @@ public class ChooseAreaFragment extends Fragment {
 
     private void queryCity(){
         title_text.setText(selectedProvince.getProvinceName());
-        cityList = DataSupport.where("provinceid = ?",String.valueOf(selectedProvince.getId())).find(City.class);
+        back.setVisibility(View.VISIBLE);
+        cityList = DataSupport.where("provinceId = ?",String.valueOf(selectedProvince.getId())).find(City.class);
         if (cityList.size() > 0) {
             dataList.clear();
             for (City city:cityList){
@@ -133,8 +137,10 @@ public class ChooseAreaFragment extends Fragment {
 
     private void queryCountry(){
         title_text.setText(selectedCity.getCityName());
-        back.setVisibility(View.GONE);
-        countryList = DataSupport.where("cityid = ?",String.valueOf(selectedCity.getId())).find(Country.class);
+        back.setVisibility(View.VISIBLE);
+        countryList = DataSupport.findAll(Country.class);
+        Log.d(TAG, "queryCountry: "+cityList.size());
+        Log.d(TAG, "queryCountry: "+countryList.size());
         if (countryList.size() > 0){
             dataList.clear();
             for (Country country:countryList){
@@ -152,7 +158,7 @@ public class ChooseAreaFragment extends Fragment {
         }
     }
     private void queryFromServer(String address, final String type){
-            showProgressDialog();
+        showProgressDialog();
         HttpUtil.sendOkHttpRequest(address, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
