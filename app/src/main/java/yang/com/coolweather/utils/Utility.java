@@ -3,6 +3,8 @@ package yang.com.coolweather.utils;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.google.gson.Gson;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -13,12 +15,25 @@ import java.util.List;
 import yang.com.coolweather.db.City;
 import yang.com.coolweather.db.Country;
 import yang.com.coolweather.db.Province;
+import yang.com.coolweather.gson.Weather;
 
 /**
  * 用来解析处理服务器返回的json数据
  * Created by 杨云杰 on 2018/4/30.
  */
 public class Utility {
+    public static Weather handlerWeatherResponse(String response){
+        try {
+            JSONObject jsonObject = new JSONObject(response);
+            JSONArray jsonArray = jsonObject.getJSONArray("HeWeather");
+            String weatherContent = jsonArray.get(0).toString();
+            Weather weather = new Gson().fromJson(weatherContent,Weather.class);//治理参数不应该包含外面的HeWeather
+            return weather;
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
     public static boolean handleProvinceResponse(String response) {
         if (!TextUtils.isEmpty(response)){
             try {
@@ -55,7 +70,6 @@ public class Utility {
             }
         }
         return false;
-
     }
     public static boolean handleCountryResponse(String response,int cityId) {
         if (!TextUtils.isEmpty(response)) {
