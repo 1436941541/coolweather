@@ -27,6 +27,7 @@ import java.util.List;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
+import yang.com.coolweather.MainActivity;
 import yang.com.coolweather.R;
 import yang.com.coolweather.WeatherActivity;
 import yang.com.coolweather.db.City;
@@ -86,10 +87,18 @@ public class ChooseAreaFragment extends Fragment {
                 }
                 else  if (currentLevel == LEVEL_COUNTRY) {
                     String weatherId = countryList.get(position).getWeatherId();
-                    Intent intent = new Intent(getActivity(), WeatherActivity.class);
-                    intent.putExtra("weather_id",weatherId);
-                    startActivity(intent);
-                    getActivity().finish();
+                    if (getActivity() instanceof MainActivity) {
+                        Intent intent = new Intent(getActivity(), WeatherActivity.class);
+                        intent.putExtra("weather_id", weatherId);
+                        startActivity(intent);
+                        getActivity().finish();
+                    }
+                    else if (getActivity() instanceof WeatherActivity) {
+                        WeatherActivity activity = (WeatherActivity) getActivity();
+                        activity.drawerLayout.closeDrawers();
+                        activity.swipeRefresh.setRefreshing(true);
+                        activity.requestWeather(weatherId);
+                    }
                 }
             }
         });
