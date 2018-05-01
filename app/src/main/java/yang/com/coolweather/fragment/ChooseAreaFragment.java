@@ -44,10 +44,11 @@ import yang.com.coolweather.utils.Utility;
 
 public class ChooseAreaFragment extends Fragment {
     public static final int LEVEL_PROVINCE = 0;
-    public static final String TAG="yyj";
     public static final int LEVEL_CITY = 1;
     public static final int LEVEL_COUNTRY = 2;
     private int currentLevel;
+    public static boolean a=false;
+    public static String  b;
     private TextView title_text;
     private Button back;
     private ProgressDialog progressDialog;
@@ -97,6 +98,8 @@ public class ChooseAreaFragment extends Fragment {
                         WeatherActivity activity = (WeatherActivity) getActivity();
                         activity.drawerLayout.closeDrawers();
                         activity.swipeRefresh.setRefreshing(true);
+                        a=true;
+                        b=weatherId;
                         activity.requestWeather(weatherId);
                     }
                 }
