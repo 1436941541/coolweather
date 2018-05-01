@@ -1,6 +1,7 @@
 package yang.com.coolweather.fragment;
 
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
@@ -27,9 +28,11 @@ import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
 import yang.com.coolweather.R;
+import yang.com.coolweather.WeatherActivity;
 import yang.com.coolweather.db.City;
 import yang.com.coolweather.db.Country;
 import yang.com.coolweather.db.Province;
+import yang.com.coolweather.gson.Weather;
 import yang.com.coolweather.utils.HttpUtil;
 import yang.com.coolweather.utils.Utility;
 
@@ -80,6 +83,13 @@ public class ChooseAreaFragment extends Fragment {
                 else if (currentLevel == LEVEL_CITY) {
                     selectedCity = cityList.get(position);
                     queryCountry();
+                }
+                else  if (currentLevel == LEVEL_COUNTRY) {
+                    String weatherId = countryList.get(position).getWeatherId();
+                    Intent intent = new Intent(getActivity(), WeatherActivity.class);
+                    intent.putExtra("weather_id",weatherId);
+                    startActivity(intent);
+                    getActivity().finish();
                 }
             }
         });
@@ -138,9 +148,7 @@ public class ChooseAreaFragment extends Fragment {
     private void queryCountry(){
         title_text.setText(selectedCity.getCityName());
         back.setVisibility(View.VISIBLE);
-        countryList = DataSupport.findAll(Country.class);
-        Log.d(TAG, "queryCountry: "+cityList.size());
-        Log.d(TAG, "queryCountry: "+countryList.size());
+        countryList = DataSupport.where("cityId = ?",String.valueOf(selectedCity.getId())).find(Country.class);
         if (countryList.size() > 0){
             dataList.clear();
             for (Country country:countryList){

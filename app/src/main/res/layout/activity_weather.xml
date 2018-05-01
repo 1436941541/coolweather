@@ -5,6 +5,11 @@
     android:layout_height="match_parent"
     android:background="@color/colorPrimary"
     tools:context="yang.com.coolweather.WeatherActivity">
+    <ImageView
+        android:layout_width="match_parent"
+        android:id="@+id/bing_pic_img"
+        android:scaleType="centerCrop"
+        android:layout_height="match_parent" />
     <ScrollView
         android:id="@+id/weather_layout"
         android:layout_width="match_parent"
@@ -12,6 +17,7 @@
         android:scrollbars="none"
         android:layout_height="match_parent">
         <LinearLayout
+            android:fitsSystemWindows="true"
             android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
@@ -22,5 +28,5 @@
             <include layout="@layout/suggestion"/>
         </LinearLayout>
     </ScrollView>
-<include layout="@layout/title"/>
+
 </FrameLayout>
