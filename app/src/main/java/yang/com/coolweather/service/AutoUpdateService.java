@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.IBinder;
 import android.os.SystemClock;
+import android.util.Log;
 
 import java.io.IOException;
 
@@ -32,13 +33,21 @@ public class AutoUpdateService extends Service {
         updateWeather();
         updateBingPic();
         AlarmManager alarmManager = (AlarmManager)getSystemService(ALARM_SERVICE);
-        int anHour = 1000*60*60*8;//8小时
+        int anHour = 1000*60*8;//8小时
         long triggerAtTime = SystemClock.elapsedRealtime() + anHour;
         Intent i = new Intent(this,AutoUpdateService.class);
         PendingIntent pi = PendingIntent.getService(this,0,i,0);
         alarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP,triggerAtTime,pi);
+        Log.d("yyj", "onStartCommand: "+1);
         return super.onStartCommand(intent, flags, startId);
     }
+
+    @Override
+    public void onDestroy() {
+
+        super.onDestroy();
+    }
+
     private void updateWeather(){
         final SharedPreferences pref = getSharedPreferences("data",MODE_PRIVATE);
         String weatherString = pref.getString("weather",null);

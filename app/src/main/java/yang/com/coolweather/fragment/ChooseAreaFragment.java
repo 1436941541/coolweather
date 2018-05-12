@@ -101,6 +101,7 @@ public class ChooseAreaFragment extends Fragment {
                         a=true;
                         b=weatherId;
                         activity.requestWeather(weatherId);
+                        Toast.makeText(getContext(),"刷新成功",Toast.LENGTH_SHORT).show();
                     }
                 }
             }
@@ -108,10 +109,10 @@ public class ChooseAreaFragment extends Fragment {
         back.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (currentLevel == LEVEL_COUNTRY){
+                if (currentLevel == LEVEL_COUNTRY) {
                     queryCity();
                 }
-                else if (currentLevel == LEVEL_CITY){
+                else if (currentLevel == LEVEL_CITY) {
                     queryProvince();
                 }
             }
