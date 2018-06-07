@@ -33,12 +33,12 @@ public class AutoUpdateService extends Service {
         updateWeather();
         updateBingPic();
         AlarmManager alarmManager = (AlarmManager)getSystemService(ALARM_SERVICE);
-        int anHour = 1000*60*8;//8小时
+        int anHour = 1000*8*60*60;//8小时
         long triggerAtTime = SystemClock.elapsedRealtime() + anHour;
         Intent i = new Intent(this,AutoUpdateService.class);
         PendingIntent pi = PendingIntent.getService(this,0,i,0);
         alarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP,triggerAtTime,pi);
-        Log.d("yyj", "onStartCommand: "+1);
+        Log.d("yyss", "onStartCommand: ");
         return super.onStartCommand(intent, flags, startId);
     }
 
@@ -55,7 +55,7 @@ public class AutoUpdateService extends Service {
             Weather weather = Utility.handlerWeatherResponse(weatherString);
             String weatherId = weather.basic.weatherId;
             String weatherUrl = "http://guolin.tech/api/weather?cityid="+weatherId+"&key=cff43f11c2b741219477b897d5de43fd";
-            HttpUtil.sendOkHttpRequest(weatherUrl, new Callback() {
+            HttpUtil.getInstance().sendOkHttpRequest(weatherUrl, new Callback() {
                 @Override
                 public void onFailure(Call call, IOException e) {
                     e.printStackTrace();
@@ -76,7 +76,7 @@ public class AutoUpdateService extends Service {
     }
     private void updateBingPic(){
          String requestBingPic = "http://guolin.tech/api/bing_pic";
-        HttpUtil.sendOkHttpRequest(requestBingPic, new Callback() {
+        HttpUtil.getInstance().sendOkHttpRequest(requestBingPic, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
                 e.printStackTrace();

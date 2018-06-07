@@ -10,7 +10,14 @@ import okhttp3.Request;
  */
 
 public class HttpUtil {
-    public static void sendOkHttpRequest(String address, Callback callback){
+    private static HttpUtil httpUtil;
+    public synchronized static HttpUtil getInstance() {
+        if (httpUtil == null) {
+            httpUtil = new HttpUtil();
+        }
+            return httpUtil;
+    }
+    public void sendOkHttpRequest(String address, Callback callback){
         OkHttpClient client=new OkHttpClient();
         Request request=new Request.Builder().url(address).build();
         client.newCall(request).enqueue(callback);

@@ -43,6 +43,7 @@ public class WeatherActivity extends AppCompatActivity {
     private TextView weatherInfoText;
     private LinearLayout forecastLayout;
     private TextView aqiText;
+    private String weatherId;
     private TextView pm25Text;
     public DrawerLayout drawerLayout;
     private Button navButton;
@@ -53,6 +54,7 @@ public class WeatherActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        //把上面的状态栏弄成隐藏
         if (Build.VERSION.SDK_INT >= 21) {
             View decorView = getWindow().getDecorView();
             int option = View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
@@ -78,7 +80,6 @@ public class WeatherActivity extends AppCompatActivity {
         else {
             loadBingPic();
         }
-        final String weatherId;
         if (weatherString != null) {
             Weather weather = Utility.handlerWeatherResponse(weatherString);
             weatherId = weather.basic.weatherId;
@@ -104,7 +105,7 @@ public class WeatherActivity extends AppCompatActivity {
     }
     private void loadBingPic(){
             String requestBingPic = "http://guolin.tech/api/bing_pic";
-        HttpUtil.sendOkHttpRequest(requestBingPic, new Callback() {
+        HttpUtil.getInstance().sendOkHttpRequest(requestBingPic, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
                 e.printStackTrace();
@@ -128,7 +129,7 @@ public class WeatherActivity extends AppCompatActivity {
     public void requestWeather(String weatherId){
             String weatherUrl = "http://guolin.tech/api/weather?cityid=" + weatherId +
                     "&key=cff43f11c2b741219477b897d5de43fd";
-        HttpUtil.sendOkHttpRequest(weatherUrl, new Callback() {
+        HttpUtil.getInstance().sendOkHttpRequest(weatherUrl, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
                 runOnUiThread(new Runnable() {
@@ -165,7 +166,7 @@ public class WeatherActivity extends AppCompatActivity {
         });
     }
     private void showWeatherInfo(Weather weather){
-        if (weather !=null &&weather.status.equals("ok")) {
+        if (weather != null &&weather.status.equals("ok")) {
             String cityName = weather.basic.cityName;
             String updateTime = weather.basic.update.updateTime.split(" ")[1];
             String degree = weather.now.temperature+"°C";
@@ -174,7 +175,8 @@ public class WeatherActivity extends AppCompatActivity {
             titleUpdateTime.setText(updateTime);
             degreeText.setText(degree);
             weatherInfoText.setText(weatherInfo);
-            forecastLayout.removeAllViews();
+            forecastLayout.removeAllViews();//因为这个layout里面是装的未来几天的数据
+            //而我们不知道到底要装几天的数据，所以要用addview的这种形式来装载
             for (Forecast forecast:weather.forecastList){
                 View view = getLayoutInflater().inflate(R.layout.forecast_item,forecastLayout,false);
                 TextView dateText = (TextView) view.findViewById(R.id.date_text);

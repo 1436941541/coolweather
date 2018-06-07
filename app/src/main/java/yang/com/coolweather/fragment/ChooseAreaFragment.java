@@ -3,6 +3,8 @@ package yang.com.coolweather.fragment;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 import android.support.v4.app.Fragment;
@@ -34,6 +36,7 @@ import yang.com.coolweather.db.City;
 import yang.com.coolweather.db.Country;
 import yang.com.coolweather.db.Province;
 import yang.com.coolweather.gson.Weather;
+import yang.com.coolweather.urls.Url;
 import yang.com.coolweather.utils.HttpUtil;
 import yang.com.coolweather.utils.Utility;
 
@@ -43,6 +46,10 @@ import yang.com.coolweather.utils.Utility;
  */
 
 public class ChooseAreaFragment extends Fragment {
+    /**
+     * 这几个常量代表的是选取的内容是城市，乡镇和省份的时候
+     * 还有一一个当前的选取的是什么的常量
+     */
     public static final int LEVEL_PROVINCE = 0;
     public static final int LEVEL_CITY = 1;
     public static final int LEVEL_COUNTRY = 2;
@@ -58,6 +65,9 @@ public class ChooseAreaFragment extends Fragment {
     private List<Province> provinceList;
     private List<City> cityList;
     private List<Country> countryList;
+    /**
+     * 记录选取的省份和城市
+     */
     private Province selectedProvince;
     private City selectedCity;
     @Nullable
@@ -89,17 +99,19 @@ public class ChooseAreaFragment extends Fragment {
                 else  if (currentLevel == LEVEL_COUNTRY) {
                     String weatherId = countryList.get(position).getWeatherId();
                     if (getActivity() instanceof MainActivity) {
+                        //当选取country是在MainActivity中的时候回跳转
                         Intent intent = new Intent(getActivity(), WeatherActivity.class);
                         intent.putExtra("weather_id", weatherId);
                         startActivity(intent);
                         getActivity().finish();
                     }
+                    //当fragment是在weatherActivity的时候关闭侧滑栏，显示在加载
                     else if (getActivity() instanceof WeatherActivity) {
                         WeatherActivity activity = (WeatherActivity) getActivity();
                         activity.drawerLayout.closeDrawers();
                         activity.swipeRefresh.setRefreshing(true);
-                        a=true;
-                        b=weatherId;
+                        a = true;
+                        b = weatherId;
                         activity.requestWeather(weatherId);
                         Toast.makeText(getContext(),"刷新成功",Toast.LENGTH_SHORT).show();
                     }
@@ -119,25 +131,35 @@ public class ChooseAreaFragment extends Fragment {
         });
         queryProvince();
     }
+
+    /**
+     * ，默认启动为先查找省份的
+     * 查找数据的时候先判断数据库里的数据是否含有。
+     * 有的话就在listview上刷新出来
+     * 没有的话就去url上面查找
+     */
     private void queryProvince(){
         title_text.setText("中国");
         back.setVisibility(View.GONE);
         provinceList = DataSupport.findAll(Province.class);
-        if (provinceList.size() > 0){
+        if (provinceList.size() > 0) {
             dataList.clear();
             for (Province province:provinceList){
                 dataList.add(province.getProvinceName());
             }
+            //将数据加载进来后刷新adapter，listview置于第一行当前选取的等级置为省等级
             arrayAdapter.notifyDataSetChanged();
             listView.setSelection(0);
             currentLevel = LEVEL_PROVINCE;
         }
         else {
-            String address = "http://guolin.tech/api/china";
-            queryFromServer(address,"province");
+            queryFromServer(Url.PROVINCE_ADDRESS,"province");
         }
     }
 
+    /**
+     * 查找城市，更具你选取的省份的id来找其中的数据
+     */
     private void queryCity(){
         title_text.setText(selectedProvince.getProvinceName());
         back.setVisibility(View.VISIBLE);
@@ -153,7 +175,7 @@ public class ChooseAreaFragment extends Fragment {
         }
         else {
             int provinceCode = selectedProvince.getProvinceCode();
-            String address = "http://guolin.tech/api/china/" + provinceCode;
+            String address = Url.PROVINCE_ADDRESS + "/" + provinceCode;
             queryFromServer(address,"city");
         }
     }
@@ -174,13 +196,13 @@ public class ChooseAreaFragment extends Fragment {
         else {
             int provinceCode = selectedProvince.getProvinceCode();
             int cityCode = selectedCity.getCityCode();
-            String address = "http://guolin.tech/api/china/" + provinceCode +"/" + cityCode;
+            String address = Url.PROVINCE_ADDRESS + "/" + provinceCode +"/" + cityCode;
             queryFromServer(address,"country");
         }
     }
     private void queryFromServer(String address, final String type){
         showProgressDialog();
-        HttpUtil.sendOkHttpRequest(address, new Callback() {
+        HttpUtil.getInstance().sendOkHttpRequest(address, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
                 getActivity().runOnUiThread(new Runnable() {
@@ -196,6 +218,7 @@ public class ChooseAreaFragment extends Fragment {
             public void onResponse(Call call, Response response) throws IOException {
                 String responseText = response.body().string();
                 boolean result = false;
+                //result用来确定是否成功的解析出了数据
                 if ("province".equals(type)){
                     result = Utility.handleProvinceResponse(responseText);
                 }
@@ -225,6 +248,10 @@ public class ChooseAreaFragment extends Fragment {
             }
         });
     }
+
+    /**
+     * 展示数据加载的ui
+     */
     private void showProgressDialog(){
         if (progressDialog==null){
             progressDialog = new ProgressDialog(getContext());
@@ -233,6 +260,10 @@ public class ChooseAreaFragment extends Fragment {
         }
         progressDialog.show();
     }
+
+    /**
+     * 隐藏数据加载的ui
+     */
     private void closeProgressDialog() {
         if (progressDialog!=null) {
             progressDialog.dismiss();
